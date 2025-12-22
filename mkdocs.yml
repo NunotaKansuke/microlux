@@ -63,8 +63,6 @@ plugins:
     - mkdocstrings:
         handlers:
             python:
-                selection:
-                    inherited_members: true  # Allow looking up inherited methods
                 options:
                     show_source: false  # Don't include source code
                     show_root_heading: true
@@ -73,6 +71,7 @@ plugins:
                     show_signature_annotations: true
                     members_order: source
                     heading_level: 2
+                    inherited_members: true  # Allow looking up inherited methods
                 # rendering:
                 #     show_root_heading: true  # actually display anything at all...
                 #     show_root_full_path: true  # display "diffrax.asdf" not just "asdf"
