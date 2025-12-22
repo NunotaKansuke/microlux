@@ -1,4 +1,5 @@
 VBBinaryLensing==3.6.2
+matplotlib
 pytest==8.2.2
 pytest-xdist==3.6.1
 scipy
