@@ -111,9 +111,9 @@ def test_poly_coefficients_consistency(s, m2):
     coeffs_refactored = get_poly_coff(zeta_l, s, m2)
 
     # 3. Compare results using an assertion
-    assert np.allclose(coeffs_original, coeffs_refactored), (
-        f"Coefficients do not match for s={s:.4f} and m2={m2:.4f}"
-    )
+    assert np.allclose(
+        coeffs_original, coeffs_refactored
+    ), f"Coefficients do not match for s={s:.4f} and m2={m2:.4f}"
 
 
 if __name__ == "__main__":
