@@ -47,10 +47,9 @@ def grad_test(t_0, u_0, t_E, rho, q, s, alpha_deg, times, retol, tol):
         bbox_transform=ax.transAxes,
     )
 
-    from MulensModel import Caustics
+    from test_util import get_caustics
 
-    caustic = Caustics(q, s)
-    caustic_x, caustic_y = caustic.get_caustics()
+    caustic_x, caustic_y = get_caustics(q, s)
     ax_traj.scatter(caustic_x, caustic_y, s=0.5, c="black")
     ax_traj.axis("equal")
     trajectory = (times - t_0) / t_E * np.exp(1j * alpha) + 1j * u_0 * np.exp(

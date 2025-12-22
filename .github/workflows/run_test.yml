@@ -28,7 +28,7 @@ jobs:
         python -m pip install .
       
     - name: Checks with pre-commit
-      uses: pre-commit/action@v2.0.3
+      uses: pre-commit/action@v3.0.1
 
     # use the pytest action with xdist to run tests in parallel, only run tests marked as fast    
     - name: Test with pytest
