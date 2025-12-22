@@ -4,7 +4,6 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 import VBBinaryLensing
-from MulensModel import CausticsBinary
 
 
 def timeit(f, iters=10, verbose=True):
@@ -105,6 +104,62 @@ def get_trajectory(tau, u_0, alpha_deg):
     return trajectory
 
 
+def get_caustics(q, s, n_points=5000):
+    """
+    Returns x and y vectors corresponding to the outlines of the
+    caustics. Origin is center of mass and larger mass is on the
+    left (for q < 1).
+
+    Based on Eq. 6 Cassan 2008 modified so origin is center of
+    mass and larger mass is on the left. Uses complex coordinates.
+    """
+    from math import cos, sin
+
+    # Find number of angles so that 4*n_angles is the multiple of 4 that
+    # is closest to n_points.
+    n_angles = int(n_points / 4.0 + 0.5)
+
+    # Initialize variables
+    x_list = []
+    y_list = []
+
+    # Distance between primary mass and center of mass
+    xcm_offset = q * s / (1.0 + q)
+
+    # Solve for the critical curve (and caustic) in complex coordinates.
+    for phi in np.linspace(0.0, 2.0 * np.pi, n_angles, endpoint=False):
+        # Change the angle to a complex number
+        eiphi = complex(cos(phi), sin(phi))
+
+        # Coefficients of Eq. 6
+        coeff_4 = 1.0
+        coeff_3 = -2.0 * s
+        coeff_2 = s**2 - eiphi
+        coeff_1 = eiphi * (2.0 * s / (1.0 + q))
+        coeff_0 = -(s**2) * eiphi / (1.0 + q)
+
+        # Find roots
+        coeff_list = [coeff_0, coeff_1, coeff_2, coeff_3, coeff_4]
+        roots = np.polynomial.polynomial.polyroots(coeff_list)
+        # Store results
+        for root in roots:
+            source_plane_position = _solve_lens_equation(root, q, s)
+            x_list.append(source_plane_position.real - xcm_offset)
+            y_list.append(source_plane_position.imag)
+
+    return x_list, y_list
+
+
+def _solve_lens_equation(complex_value, q, s):
+    """
+    Solve the lens equation for the given point (in complex coordinates).
+    """
+    complex_conjugate = np.conjugate(complex_value)
+    return complex_value - (1.0 / (1.0 + q)) * (
+        (1.0 / complex_conjugate) + (q / (complex_conjugate - s))
+    )
+
+
 def get_caustic_permutation(rho, q, s, n_points=1000):
     """
     Test around the caustic, apadpted from https://github.com/fbartolic/caustics/blob/main/tests/test_extended_source.py
@@ -113,9 +168,8 @@ def get_caustic_permutation(rho, q, s, n_points=1000):
 
     - return the permutation of the caustic in the central of mass coordinate system
     """
-    caustic = CausticsBinary(q, s)
-    x, y = caustic.get_caustics(n_points)
-    z_centeral = jnp.array(jnp.array(x) + 1j * jnp.array(y))
+    x, y = get_caustics(q, s, n_points)
+    z_centeral = jnp.array(x) + 1j * jnp.array(y)
     ## random change the position of the source
     key = jax.random.key(42)
     key, subkey1, subkey2 = jax.random.split(key, num=3)
@@ -123,3 +177,19 @@ def get_caustic_permutation(rho, q, s, n_points=1000):
     r = jax.random.uniform(subkey2, z_centeral.shape, minval=0.0, maxval=2 * rho)
     z_centeral = z_centeral + r * jnp.exp(1j * phi)
     return z_centeral
+
+
+if __name__ == "__main__":
+    import matplotlib.pyplot as plt
+
+    # Example: plot caustic for q=0.001, s=1.4
+    q = 0.001
+    s = 1.4
+    x, y = get_caustics(q, s, n_points=1000)
+
+    plt.scatter(x, y, s=1)
+    plt.axis("equal")
+    plt.title(f"Caustic for q={q}, s={s}")
+    plt.xlabel("x")
+    plt.ylabel("y")
+    plt.show()
