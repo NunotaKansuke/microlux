@@ -63,10 +63,6 @@ plugins:
     - mkdocstrings:
         handlers:
             python:
-                setup_commands:
-                    - import pytkdocs_tweaks
-                    - pytkdocs_tweaks.main()
-
                 selection:
                     inherited_members: true  # Allow looking up inherited methods
                 options:
