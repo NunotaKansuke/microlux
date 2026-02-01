@@ -4,6 +4,7 @@ all = [
     "extended_light_curve",
     "contour_integral",
     "binary_mag",
+    "make_binary_mag_with_parallax",
     "Iterative_State",
     "Error_State",
     "to_lowmass",
@@ -17,6 +18,8 @@ from .basic_function import (
 from .countour import contour_integral as contour_integral
 from .model import (
     binary_mag as binary_mag,
+    make_binary_mag_with_parallax as make_binary_mag_with_parallax,
+
     extended_light_curve as extended_light_curve,
     point_light_curve as point_light_curve,
 )
