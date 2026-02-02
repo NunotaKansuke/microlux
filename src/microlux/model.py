@@ -281,16 +281,8 @@ def extended_light_curve(
 
 def make_binary_mag_with_parallax(ra, dec, tref):
     # --- ephemeris & projector are created ONCE ---
-    def load_earth_orbital_parallax_array():
-        p = resources.files("jacscanomaly.data").joinpath(
-            "earth_orbital_parallax_table.txt"
-        )
-        with p.open("r") as f:
-            return np.genfromtxt(f, skip_header=59, skip_footer=60)
-
-    eph = parallax.HeliocentricEphemeris.from_horizons_table(
-        load_earth_orbital_parallax_array()
-    )
+    tab = parallax.load_horizons_vectors_file(resources.files("jacscanomaly.data").joinpath("earth_orbital_parallax_table.txt"))
+    eph = parallax.HeliocentricEphemeris.from_horizons_vectors_table(tab)
     P = parallax.EarthOrbitalParallaxProjector(eph, ra, dec, tref)
 
     # --- inner function closes over P ---
@@ -311,15 +303,15 @@ def make_binary_mag_with_parallax(ra, dec, tref):
         q,
         s,
         alpha_deg,
+        piEN,
+        piEE,
         times: jnp.ndarray,
         tol=1e-2,
         retol=0.001,
         default_strategy=(30, 30, 60, 120, 240),
         analytic=True,
         return_info=False,
-        limb_darkening_coeff=None,
-        piEN: float = 0.0,
-        piEE: float = 0.0,
+        limb_darkening_coeff=None
     ):
         alpha_rad = alpha_deg * 2 * jnp.pi / 360
         tau0 = (times - t_0) / t_E
